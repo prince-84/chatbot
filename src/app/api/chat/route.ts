@@ -68,7 +68,7 @@ function buildReellyResponse(reellyProjects: any[], userMessage: string): string
   });
 
   return JSON.stringify({
-    summary: "Based on your criteria, here are top grounded property recommendations retrieved from live market database:",
+    summary: "Hello! Welcome. I'm here to help you find the right property in Dubai.\n\nBased on your profile — I have three properties in our current records that may be worth discussing.\n\nFeel free to ask me about any of them, or ask me to compare options. What would you like to know?",
     projects
   });
 }
@@ -102,7 +102,7 @@ Answer the user query using ONLY the provided data.
 
 Return a JSON object in this EXACT format (no extra text, just the JSON):
 {
-  "summary": "One sentence intro about the recommendations",
+  "summary": "Hello! Welcome. I'm here to help you find the right property in Dubai.\\n\\nBased on your profile — [summarize user choices] — I have matching properties in our current records that may be worth discussing.\\n\\nFeel free to ask me about any of them, or ask me to compare options.",
   "projects": [
     {
       "name": "Project Name",

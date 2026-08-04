@@ -215,6 +215,59 @@ function LoadingProgress() {
   );
 }
 
+// ─── Lead Form Card Component ───────────────────────────────────────────────────
+
+function LeadFormCard() {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !phone.trim()) return;
+    setSubmitted(true);
+  };
+
+  return (
+    <div className="border border-line rounded-xl bg-paper p-5 my-4 shadow-xs">
+      <p className="text-[14px] text-ink leading-relaxed font-medium mb-4">
+        Want the full breakdown with payment schedules and current availability? An advisor will send it across and walk you through it.
+      </p>
+
+      {submitted ? (
+        <div className="p-3.5 bg-teal-soft border border-teal/20 rounded-lg text-teal font-medium text-[13.5px] flex items-center gap-2">
+          <span>✓</span> Thank you{name ? `, ${name}` : ''}! An advisor will contact you on WhatsApp shortly.
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <input
+            type="text"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Your name"
+            className="w-full text-[14px] px-3.5 py-2.5 bg-paper-2 border border-line rounded-lg text-ink focus:outline-none focus:border-teal transition-colors"
+          />
+          <input
+            type="tel"
+            required
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="WhatsApp number"
+            className="w-full text-[14px] px-3.5 py-2.5 bg-paper-2 border border-line rounded-lg text-ink focus:outline-none focus:border-teal transition-colors"
+          />
+          <button
+            type="submit"
+            className="w-full bg-teal hover:bg-teal/90 text-white font-medium text-[14px] py-2.5 px-4 rounded-lg transition-colors cursor-pointer"
+          >
+            Send it over
+          </button>
+        </form>
+      )}
+    </div>
+  );
+}
+
 // ─── Assistant Message Renderer ───────────────────────────────────────────────
 
 function AssistantMessage({ msg }: { msg: Message }) {
@@ -223,13 +276,19 @@ function AssistantMessage({ msg }: { msg: Message }) {
   // Structured card response
   if (ai?.projects && ai.projects.length > 0) {
     return (
-      <div className="max-w-full mb-2">
+      <div className="max-w-full mb-4">
         {ai.summary && (
-          <p className="text-[13px] text-muted mb-3 italic">{ai.summary}</p>
+          <p className="text-[14px] text-ink mb-3 leading-relaxed font-sans">{ai.summary}</p>
         )}
         {ai.projects.map((card, i) => (
           <PropertyCardComponent key={i} card={card} />
         ))}
+        
+        <p className="text-[12.5px] text-muted italic my-3">
+          Figures to be confirmed by your advisor.
+        </p>
+
+        <LeadFormCard />
       </div>
     );
   }
@@ -237,22 +296,30 @@ function AssistantMessage({ msg }: { msg: Message }) {
   // Short answer response
   if (ai?.answer) {
     return (
-      <div className="max-w-[88%] mb-2">
+      <div className="max-w-full mb-4">
         <div className="p-3.5 border border-line-soft bg-paper text-ink rounded-2xl rounded-tl-sm shadow-xs text-[14.5px] leading-relaxed">
           {ai.answer}
         </div>
+        <p className="text-[12.5px] text-muted italic my-2">
+          Figures to be confirmed by your advisor.
+        </p>
+        <LeadFormCard />
       </div>
     );
   }
 
   // Fallback: plain markdown
   return (
-    <div className="max-w-[88%] mb-2">
+    <div className="max-w-full mb-4">
       <div className="p-3.5 border border-line-soft bg-paper text-ink rounded-2xl rounded-tl-sm shadow-xs">
         <div className="prose prose-sm max-w-none text-ink">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
         </div>
       </div>
+      <p className="text-[12.5px] text-muted italic my-2">
+        Figures to be confirmed by your advisor.
+      </p>
+      <LeadFormCard />
     </div>
   );
 }
