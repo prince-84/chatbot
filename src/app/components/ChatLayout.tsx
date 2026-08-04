@@ -169,48 +169,14 @@ function PropertyCardComponent({ card }: { card: ProjectCard }) {
   );
 }
 
-// ─── Loading Progress Component ──────────────────────────────────────────────
-
-const LOADING_STEPS = [
-  "🔍 Querying live market database for matching properties…",
-  "📊 Filtering 49+ projects by your budget & criteria…",
-  "🤖 AI analyzing yields, sqft prices & handover dates…",
-  "✨ Generating grounded property recommendations…",
-];
+// ─── Loading / Typing Indicator ──────────────────────────────────────────────
 
 function LoadingProgress() {
-  const [stepIndex, setStepIndex] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setStepIndex((prev) => (prev < LOADING_STEPS.length - 1 ? prev + 1 : prev));
-    }, 1800);
-    return () => clearInterval(timer);
-  }, []);
-
   return (
-    <div className="my-3 p-4 border border-line rounded-xl bg-paper-2 shadow-xs space-y-3 animate-pulse">
-      {/* Progress Bar Header */}
-      <div className="flex items-center justify-between text-[12px] font-medium text-muted">
-        <span className="flex items-center gap-2 text-teal">
-          <span className="w-2 h-2 rounded-full bg-teal animate-ping" />
-          Analyzing Market Data
-        </span>
-        <span className="font-mono text-[11px]">Step {stepIndex + 1} of {LOADING_STEPS.length}</span>
-      </div>
-
-      {/* Progress Bar */}
-      <div className="w-full bg-line-soft h-1.5 rounded-full overflow-hidden">
-        <div
-          className="bg-teal h-full transition-all duration-700 ease-out"
-          style={{ width: `${((stepIndex + 1) / LOADING_STEPS.length) * 100}%` }}
-        />
-      </div>
-
-      {/* Step Status Text */}
-      <div className="text-[13.5px] text-ink font-medium transition-all duration-300">
-        {LOADING_STEPS[stepIndex]}
-      </div>
+    <div className="flex items-center gap-1.5 px-4 py-3 border border-line-soft bg-paper rounded-2xl rounded-tl-sm w-fit my-3 shadow-xs">
+      <span className="w-2 h-2 rounded-full bg-teal animate-bounce" style={{ animationDelay: "0ms" }} />
+      <span className="w-2 h-2 rounded-full bg-teal animate-bounce" style={{ animationDelay: "150ms" }} />
+      <span className="w-2 h-2 rounded-full bg-teal animate-bounce" style={{ animationDelay: "300ms" }} />
     </div>
   );
 }
