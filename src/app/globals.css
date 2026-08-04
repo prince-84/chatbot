@@ -1,26 +1,55 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --font-sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  
+  --color-sand: #E8E4DA;
+  --color-paper: #FCFBF8;
+  --color-paper-2: #F4F1E9;
+  --color-ink: #1A2530;
+  --color-muted: #6E7885;
+  --color-teal: #1D5C58;
+  --color-teal-soft: #E2EBE9;
+  --color-rust: #9C4A2F;
+  --color-rust-soft: #F2E5DF;
+  --color-line: #D8D3C6;
+  --color-line-soft: #E6E2D7;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html, body {
+    @apply m-0 p-0 text-[15px] leading-[1.55];
+  }
+  body {
+    @apply bg-sand text-ink font-sans antialiased;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Prose / Markdown rendering for Claude AI responses */
+  .prose h1, .prose h2, .prose h3 { @apply font-semibold text-ink mt-4 mb-2; }
+  .prose h1 { @apply text-xl; }
+  .prose h2 { @apply text-lg; }
+  .prose h3 { @apply text-base; }
+  .prose p { @apply mb-3 leading-relaxed; }
+  .prose ul, .prose ol { @apply pl-5 mb-3 space-y-1; }
+  .prose ul li { @apply list-disc; }
+  .prose ol li { @apply list-decimal; }
+  .prose strong { @apply font-semibold; }
+  .prose hr { @apply border-line my-4; }
+  .prose table { @apply w-full border-collapse text-[13px] mb-3; }
+  .prose th { @apply bg-paper-2 text-left px-3 py-2 border border-line font-semibold text-muted uppercase text-[11px] tracking-wide; }
+  .prose td { @apply px-3 py-2 border border-line; }
+  .prose tr:nth-child(even) td { @apply bg-paper-2; }
+  .prose code { @apply bg-paper-2 px-1.5 py-0.5 rounded text-[13px] font-mono; }
 }
