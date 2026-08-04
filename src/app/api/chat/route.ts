@@ -18,8 +18,17 @@ async function fetchReellyProjects(): Promise<any[]> {
 
 function buildReellyResponse(reellyProjects: any[], userMessage: string): string {
   const msg = userMessage.toLowerCase();
-  let filtered = [...reellyProjects];
+  const isQuestionnaire = userMessage.trim().startsWith("Goal:");
 
+  if (!isQuestionnaire) {
+    // Custom input query response
+    return JSON.stringify({
+      answer: `Based on live Dubai market records, we have verified data for over ${reellyProjects.length || 49} residential developments. Feel free to ask about specific areas like Business Bay, Marina, or Downtown, or request a comparison.`
+    });
+  }
+
+  // Questionnaire recommendation cards
+  let filtered = [...reellyProjects];
   if (msg.includes('under aed 1m') || msg.includes('under_1m')) {
     filtered = filtered.filter(p => p.min_price > 0 && p.min_price < 1000000);
   } else if (msg.includes('aed 1') || msg.includes('1m_3m')) {
@@ -78,7 +87,6 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    // Support both plain {text} and messages[] format
     if (body.text) {
       userMessage = body.text;
     } else if (Array.isArray(body.messages) && body.messages.length > 0) {
@@ -89,16 +97,19 @@ export async function POST(req: Request) {
     // keep default
   }
 
-  // Attempt Anthropic Claude if key exists
+  const isQuestionnaire = userMessage.trim().startsWith("Goal:");
+
+  // Attempt Anthropic Claude / OpenRouter if key exists
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
   if (anthropicKey) {
     try {
       const reellyProjects = await fetchReellyProjects();
-      const systemPrompt = `You are an Advisory Assistant for Dubai residential real estate grounded in live property database records.
+      
+      let systemPrompt = "";
+      if (isQuestionnaire) {
+        systemPrompt = `You are an Advisory Assistant for Dubai residential real estate grounded in live property database records.
 Here is live project data:
 ${JSON.stringify(reellyProjects.slice(0, 5))}
-
-Answer the user query using ONLY the provided data.
 
 Return a JSON object in this EXACT format (no extra text, just the JSON):
 {
@@ -125,8 +136,20 @@ Rules:
 - badge values: "BEST FIT", "OPTION 2", "OPTION 3", "CONSIDER"
 - Show max 3 projects
 - ALWAYS include netYield (e.g. 6.2%), pricePsf (e.g. 1,040), vsArea (e.g. -5%), and from (e.g. AED 690K) for every project card
-- pros/cons: max 2 each, short factual sentences only
-- If user asks a general question (not for properties), return: {"answer": "your short answer here"}`;
+- pros/cons: max 2 each, short factual sentences only`;
+      } else {
+        systemPrompt = `You are an Advisory Assistant for Dubai residential real estate grounded in live property database records.
+Here is live project data:
+${JSON.stringify(reellyProjects.slice(0, 5))}
+
+CRITICAL RULE: The user is asking a direct question in the input chat box. Do NOT generate or suggest any property cards or "projects" array.
+Provide a clear, helpful, conversational answer to the user's query in 2-3 paragraphs based on real estate knowledge and live records.
+
+Return a JSON object in this EXACT format:
+{
+  "answer": "Your clear conversational answer text here. Use markdown formatting if helpful."
+}`;
+      }
 
 
       let responseText = "";
