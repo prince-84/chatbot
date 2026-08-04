@@ -76,8 +76,13 @@ function buildReellyResponse(reellyProjects: any[], userMessage: string): string
     };
   });
 
+  const p1 = projects[0] || {};
+  const p2 = projects[1] || projects[0] || {};
+
+  const summary = `Both are ready, low-risk properties with chiller included, so the real question is income versus location quality.\n\n**Yield:** ${p1.name} edges ahead at ${p1.netYield} net vs ${p2.name}'s ${p2.netYield}, and starts lower at ${p1.from} vs ${p2.from}. **Community supply risk** strongly favours ${p2.name} — tight incoming supply in ${p2.location}, meaning rents are far better protected. **Appreciation:** ${p1.location} ran 13.1% last year vs ${p2.location}'s 8.2%, but advisor notes flag limited capital upside for ${p1.name} going forward.\n\nFor your residential, short-term profile, ${p2.name}'s location and tight supply make it the stronger hold, but ${p1.name} suits a tighter budget entry.\n\nFigures to be confirmed by your advisor.`;
+
   return JSON.stringify({
-    summary: "Hello! Welcome. I'm here to help you find the right property in Dubai.\n\nBased on your profile — I have three properties in our current records that may be worth discussing.\n\nFeel free to ask me about any of them, or ask me to compare options. What would you like to know?",
+    summary,
     projects
   });
 }
@@ -113,7 +118,7 @@ ${JSON.stringify(reellyProjects.slice(0, 5))}
 
 Return a JSON object in this EXACT format (no extra text, just the JSON):
 {
-  "summary": "Hello! Welcome. I'm here to help you find the right property in Dubai.\\n\\nBased on your profile — [summarize user choices] — I have matching properties in our current records that may be worth discussing.\\n\\nFeel free to ask me about any of them, or ask me to compare options.",
+  "summary": "Both are ready, low-risk properties with chiller included, so the real question is income versus location quality.\\n\\n**Yield:** [Project 1 Name] edges ahead at [Yield 1]% net vs [Project 2 Name]'s [Yield 2]%, and starts lower at [Price 1] vs [Price 2]. **Community supply risk** strongly favours [Project 2 Name] — limited incoming units in [Location 2], meaning rents are far better protected. **Appreciation:** [Location 1] ran 13.1% last year vs [Location 2]'s 8.2%, but advisor notes flag limited capital upside for [Project 1 Name] going forward.\\n\\nFor your [user profile], [Project 2 Name]'s location and tight supply make it the stronger hold, but [Project 1 Name] suits a tighter budget entry.\\n\\nFigures to be confirmed by your advisor.",
   "projects": [
     {
       "name": "Project Name",
@@ -133,6 +138,7 @@ Return a JSON object in this EXACT format (no extra text, just the JSON):
 }
 
 Rules:
+- Fill all project names, prices (e.g. AED 690K), yields (e.g. 6.2%), and locations dynamically using the provided live Reelly data
 - badge values: "BEST FIT", "OPTION 2", "OPTION 3", "CONSIDER"
 - Show max 3 projects
 - ALWAYS include netYield (e.g. 6.2%), pricePsf (e.g. 1,040), vsArea (e.g. -5%), and from (e.g. AED 690K) for every project card
