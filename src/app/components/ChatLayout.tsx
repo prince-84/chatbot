@@ -217,7 +217,9 @@ function LoadingProgress() {
 
 // ─── Lead Form Card Component ───────────────────────────────────────────────────
 
-function LeadFormCard() {
+// ─── Lead Form Card Component ───────────────────────────────────────────────────
+
+function LeadFormCard({ onSuccess }: { onSuccess: () => void }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -226,6 +228,9 @@ function LeadFormCard() {
     e.preventDefault();
     if (!name.trim() || !phone.trim()) return;
     setSubmitted(true);
+    setTimeout(() => {
+      onSuccess();
+    }, 1500);
   };
 
   return (
@@ -270,7 +275,17 @@ function LeadFormCard() {
 
 // ─── Assistant Message Renderer ───────────────────────────────────────────────
 
-function AssistantMessage({ msg }: { msg: Message }) {
+function AssistantMessage({
+  msg,
+  isLeadSubmitted,
+  onLeadSubmit,
+  showLeadForm,
+}: {
+  msg: Message;
+  isLeadSubmitted: boolean;
+  onLeadSubmit: () => void;
+  showLeadForm: boolean;
+}) {
   const ai = msg.aiResponse;
 
   // Structured card response
@@ -288,7 +303,9 @@ function AssistantMessage({ msg }: { msg: Message }) {
           Figures to be confirmed by your advisor.
         </p>
 
-        <LeadFormCard />
+        {!isLeadSubmitted && showLeadForm && (
+          <LeadFormCard onSuccess={onLeadSubmit} />
+        )}
       </div>
     );
   }
@@ -300,6 +317,10 @@ function AssistantMessage({ msg }: { msg: Message }) {
         <div className="p-3.5 border border-line-soft bg-paper text-ink rounded-2xl rounded-tl-sm shadow-xs text-[14.5px] leading-relaxed font-sans">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{ai.answer}</ReactMarkdown>
         </div>
+
+        {!isLeadSubmitted && showLeadForm && (
+          <LeadFormCard onSuccess={onLeadSubmit} />
+        )}
       </div>
     );
   }
@@ -312,6 +333,10 @@ function AssistantMessage({ msg }: { msg: Message }) {
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
         </div>
       </div>
+
+      {!isLeadSubmitted && showLeadForm && (
+        <LeadFormCard onSuccess={onLeadSubmit} />
+      )}
     </div>
   );
 }
@@ -343,6 +368,7 @@ export default function ChatLayout() {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isLeadSubmitted, setIsLeadSubmitted] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: genId(),
@@ -352,6 +378,8 @@ export default function ChatLayout() {
     },
   ]);
   const chatRef = useRef<HTMLDivElement>(null);
+
+  const firstAssistantIdx = messages.findIndex((m) => m.role === "assistant");
 
   useEffect(() => {
     fetch("/api/reelly/stats")
@@ -477,7 +505,7 @@ export default function ChatLayout() {
         {/* Chat Column — centered with wider max-w-4xl */}
         <div className="w-full max-w-4xl flex flex-col border-x border-line bg-paper">
           <div ref={chatRef} className="p-5 overflow-y-auto flex-1 h-[60vh] md:h-auto">
-            {messages.map((item) => (
+            {messages.map((item, idx) => (
               <div key={item.id}>
                 {/* Bot question bubble */}
                 {(item.role === "bot") && (
@@ -498,7 +526,14 @@ export default function ChatLayout() {
                 )}
 
                 {/* Assistant — cards or markdown */}
-                {item.role === "assistant" && <AssistantMessage msg={item} />}
+                {item.role === "assistant" && (
+                  <AssistantMessage
+                    msg={item}
+                    isLeadSubmitted={isLeadSubmitted}
+                    onLeadSubmit={() => setIsLeadSubmitted(true)}
+                    showLeadForm={idx === firstAssistantIdx}
+                  />
+                )}
 
                 {/* Option chips */}
                 {item.options && (
