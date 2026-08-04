@@ -165,8 +165,8 @@ Return a JSON object in this EXACT format:
             "X-Title": "Dubai Real Estate Assistant",
           },
           body: JSON.stringify({
-            model: "anthropic/claude-opus-5",
-            max_tokens: 800,
+            model: "anthropic/claude-sonnet-4.6",
+            max_tokens: 500,
             messages: [
               { role: "system", content: systemPrompt },
               { role: "user", content: userMessage },

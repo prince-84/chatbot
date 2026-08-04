@@ -293,17 +293,13 @@ function AssistantMessage({ msg }: { msg: Message }) {
     );
   }
 
-  // Short answer response
+  // Short answer response for custom queries
   if (ai?.answer) {
     return (
       <div className="max-w-full mb-4">
-        <div className="p-3.5 border border-line-soft bg-paper text-ink rounded-2xl rounded-tl-sm shadow-xs text-[14.5px] leading-relaxed">
-          {ai.answer}
+        <div className="p-3.5 border border-line-soft bg-paper text-ink rounded-2xl rounded-tl-sm shadow-xs text-[14.5px] leading-relaxed font-sans">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{ai.answer}</ReactMarkdown>
         </div>
-        <p className="text-[12.5px] text-muted italic my-2">
-          Figures to be confirmed by your advisor.
-        </p>
-        <LeadFormCard />
       </div>
     );
   }
@@ -311,15 +307,11 @@ function AssistantMessage({ msg }: { msg: Message }) {
   // Fallback: plain markdown
   return (
     <div className="max-w-full mb-4">
-      <div className="p-3.5 border border-line-soft bg-paper text-ink rounded-2xl rounded-tl-sm shadow-xs">
+      <div className="p-3.5 border border-line-soft bg-paper text-ink rounded-2xl rounded-tl-sm shadow-xs font-sans">
         <div className="prose prose-sm max-w-none text-ink">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
         </div>
       </div>
-      <p className="text-[12.5px] text-muted italic my-2">
-        Figures to be confirmed by your advisor.
-      </p>
-      <LeadFormCard />
     </div>
   );
 }
