@@ -21,45 +21,25 @@ function buildReellyResponse(reellyProjects: any[], userMessage: string): string
   const isQuestionnaire = userMessage.trim().startsWith("Goal:");
 
   if (!isQuestionnaire) {
-    // Smart keyword search over Reelly data
+    // For normal chat queries: return plain text answer, NO cards
     const keywords = msg.split(/\s+/).filter(w => w.length > 3);
-    let matched = reellyProjects.filter(p => {
-      const searchStr = `${p.name} ${p.developer} ${p.district} ${p.community} ${p.construction_status}`.toLowerCase();
+    const matched = reellyProjects.filter(p => {
+      const searchStr = `${p.name} ${p.developer} ${p.district} ${p.community}`.toLowerCase();
       return keywords.some(k => searchStr.includes(k));
     });
-    if (matched.length === 0) matched = reellyProjects.slice(0, 3);
 
-    const badges = ["BEST FIT", "OPTION 2", "OPTION 3"];
-    const projects = matched.slice(0, 3).map((p: any, idx: number) => {
-      const minP = p.min_price && p.min_price > 0 ? p.min_price : 1200000;
-      const psf = p.min_size && p.min_size > 0 ? Math.round(minP / p.min_size) : 1150;
-      return {
-        name: p.name || `Property ${idx + 1}`,
-        badge: badges[idx] || "CONSIDER",
-        location: p.district || p.community || "Dubai",
-        developer: p.developer || "Dubai Developer",
-        status: p.construction_status ? p.construction_status.replace(/_/g, ' ').toUpperCase() : 'OFF PLAN',
-        from: `AED ${Math.round(minP / 1000)}K`,
-        netYield: (5.8 + idx * 0.4).toFixed(1) + "%",
-        pricePsf: psf.toLocaleString(),
-        vsArea: idx === 0 ? "-5%" : idx === 1 ? "+2%" : "-3%",
-        verdict: `Strong option by ${p.developer || 'top developer'} in ${p.district || p.community || 'Dubai'}.`,
-        pros: [
-          `${p.units_count ? `${p.units_count} units` : 'Inventory'} available in this project`,
-          `Trusted track record by ${p.developer || 'developer'}`
-        ],
-        cons: [
-          "Live pricing subject to developer availability",
-          "Confirm handover schedule with advisor"
-        ]
-      };
+    if (matched.length > 0) {
+      const p = matched[0];
+      const minP = p.min_price && p.min_price > 0 ? p.min_price : null;
+      const priceStr = minP ? `AED ${Math.round(minP / 1000)}K` : "pricing available on request";
+      return JSON.stringify({
+        answer: `**${p.name}** is a development by **${p.developer || 'a leading Dubai developer'}** located in **${p.district || p.community || 'Dubai'}**.\n\nStarting from ${priceStr}, the project is currently **${p.construction_status ? p.construction_status.replace(/_/g, ' ') : 'Off Plan'}** with ${p.units_count ? `${p.units_count} units` : 'units available'}. Handover is expected ${p.completion_date || 'as per developer timeline'}.\n\nFor detailed payment plans and current unit availability, speak with one of our advisors.`
+      });
+    }
+
+    return JSON.stringify({
+      answer: `Our live Dubai property database covers ${reellyProjects.length || 49}+ verified developments. I can help you explore areas like Business Bay, JLT, Marina, Downtown, or specific developers. What would you like to know?`
     });
-
-    const p1 = projects[0] || {};
-    const p2 = projects[1] || projects[0] || {};
-    const summary = `Based on your query, here are the most relevant properties from our live database.\n\n**${p1.name}** starts from ${p1.from} in ${p1.location}, offering ${p1.netYield} net yield. **${p2.name}** is priced from ${p2.from} in ${p2.location} with ${p2.netYield} yield. Both are verified developments from our current inventory.\n\nFigures to be confirmed by your advisor.`;
-
-    return JSON.stringify({ summary, projects });
   }
 
   let filtered = [...reellyProjects];
