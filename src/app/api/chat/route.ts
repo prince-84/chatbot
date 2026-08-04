@@ -123,32 +123,62 @@ Rules:
 - If user asks a general question (not for properties), return: {"answer": "your short answer here"}`;
 
 
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'x-api-key': anthropicKey,
-          'anthropic-version': '2023-06-01',
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 1200,
-          system: systemPrompt,
-          messages: [{ role: 'user', content: userMessage }],
-        }),
-      });
+      let responseText = "";
 
-      if (response.ok) {
-        const data = await response.json();
-        const text = data.content?.[0]?.text || '';
-        if (text) {
-          return new Response(`0:${JSON.stringify(text)}\n`, {
-            headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-          });
+      if (anthropicKey.startsWith("sk-or-v1-")) {
+        // OpenRouter API
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${anthropicKey}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": "http://localhost:3000",
+            "X-Title": "Dubai Real Estate Assistant",
+          },
+          body: JSON.stringify({
+            model: "anthropic/claude-sonnet-4.6",
+            max_tokens: 800,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userMessage },
+            ],
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          responseText = data.choices?.[0]?.message?.content || "";
+        }
+      } else {
+        // Direct Anthropic API
+        const response = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "x-api-key": anthropicKey,
+            "anthropic-version": "2023-06-01",
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "claude-sonnet-4-6",
+            max_tokens: 1200,
+            system: systemPrompt,
+            messages: [{ role: "user", content: userMessage }],
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          responseText = data.content?.[0]?.text || "";
         }
       }
+
+      if (responseText) {
+        return new Response(`0:${JSON.stringify(responseText)}\n`, {
+          headers: { "Content-Type": "text/plain; charset=utf-8" },
+        });
+      }
     } catch (e) {
-      console.warn('Anthropic error, falling back to Reelly data engine.');
+      console.warn("AI API error, falling back to live market records engine:", e);
     }
   }
 
