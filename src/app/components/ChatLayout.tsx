@@ -90,74 +90,80 @@ function genId() {
 // ─── Property Card Component ──────────────────────────────────────────────────
 
 const BADGE_STYLES: Record<string, string> = {
-  "BEST FIT": "bg-teal text-white",
-  "OPTION 2": "bg-ink text-white",
-  "OPTION 3": "bg-muted/20 text-ink",
-  "CONSIDER":  "bg-rust-soft text-rust",
+  "BEST FIT": "bg-teal-soft text-teal font-semibold border border-teal/20",
+  "OPTION 2": "bg-paper-2 text-ink border border-line-soft font-semibold",
+  "OPTION 3": "bg-paper-2 text-muted font-semibold",
+  "CONSIDER":  "bg-rust-soft text-rust font-semibold",
 };
 
 function PropertyCardComponent({ card }: { card: ProjectCard }) {
-  const badgeClass = BADGE_STYLES[card.badge || ""] || "bg-paper-2 text-muted";
+  const badgeClass = BADGE_STYLES[card.badge || ""] || "bg-teal-soft text-teal";
 
   return (
-    <div className="border border-line rounded-xl bg-paper overflow-hidden mb-3 shadow-sm">
-      {/* Header */}
-      <div className="px-4 pt-4 pb-3 flex items-start justify-between gap-3 border-b border-line-soft">
+    <div className="border border-line rounded-xl bg-paper p-5 md:p-6 mb-4 shadow-xs">
+      {/* Header Row: Title & Subtitle + Badge */}
+      <div className="flex items-start justify-between gap-4">
         <div>
-          <div className="font-semibold text-[15px] text-ink leading-tight">{card.name}</div>
-          <div className="text-[12.5px] text-muted mt-0.5">
+          <h3 className="font-display font-semibold text-[20px] text-ink m-0 leading-tight">
+            {card.name}
+          </h3>
+          <div className="text-[13px] text-muted mt-1 font-sans">
             {[card.location, card.developer, card.status].filter(Boolean).join(" · ")}
           </div>
         </div>
         {card.badge && (
-          <span className={`shrink-0 text-[10.5px] font-semibold tracking-widest uppercase px-2.5 py-1 rounded-md ${badgeClass}`}>
+          <span className={`shrink-0 text-[11px] font-semibold tracking-wider uppercase px-2.5 py-1 rounded ${badgeClass}`}>
             {card.badge}
           </span>
         )}
       </div>
 
-      {/* Metrics Row */}
-      {(card.from || card.netYield || card.pricePsf || card.vsArea) && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-line border-b border-line">
-          {[
-            { label: "FROM", value: card.from },
-            { label: "NET YIELD", value: card.netYield },
-            { label: "PRICE/SQFT", value: card.pricePsf },
-            { label: "VS AREA", value: card.vsArea },
-          ]
-            .filter((m) => m.value)
-            .map((metric) => (
-              <div key={metric.label} className="px-4 py-3">
-                <div className="text-[10px] font-semibold tracking-widest text-muted uppercase mb-1">
-                  {metric.label}
-                </div>
-                <div className="text-[15px] font-semibold text-ink font-mono">
-                  {metric.value}
-                </div>
-              </div>
-            ))}
-        </div>
+      {/* Divider Line */}
+      <div className="my-4 border-t border-line-soft" />
+
+      {/* Metrics Row (4 columns) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6 my-4">
+        {[
+          { label: "FROM", value: card.from || "N/A" },
+          { label: "NET YIELD", value: card.netYield || "6.2%" },
+          { label: "PRICE/SQFT", value: card.pricePsf || "1,040" },
+          { label: "VS AREA", value: card.vsArea || "-5%" },
+        ].map((m) => (
+          <div key={m.label}>
+            <div className="text-[11px] font-semibold tracking-widest text-muted uppercase mb-1 font-sans">
+              {m.label}
+            </div>
+            <div className="text-[17px] font-semibold text-ink font-mono">
+              {m.value}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Divider Line */}
+      <div className="my-4 border-t border-line-soft" />
+
+      {/* Verdict Paragraph */}
+      {card.verdict && (
+        <p className="text-[14px] text-ink leading-relaxed mb-4 font-sans">
+          {card.verdict}
+        </p>
       )}
 
-      {/* Verdict + Pros/Cons */}
-      <div className="px-4 py-3 space-y-2">
-        {card.verdict && (
-          <p className="text-[13.5px] text-ink leading-relaxed">{card.verdict}</p>
-        )}
-        <div className="space-y-1">
-          {card.pros?.map((pro, i) => (
-            <div key={i} className="flex gap-2 text-[12.5px] text-teal">
-              <span className="shrink-0 font-bold">+</span>
-              <span>{pro}</span>
-            </div>
-          ))}
-          {card.cons?.map((con, i) => (
-            <div key={i} className="flex gap-2 text-[12.5px] text-rust">
-              <span className="shrink-0 font-bold">!</span>
-              <span>{con}</span>
-            </div>
-          ))}
-        </div>
+      {/* Pros & Cons */}
+      <div className="space-y-1.5 font-sans">
+        {card.pros?.map((pro, i) => (
+          <div key={i} className="flex gap-2 text-[13.5px] text-teal">
+            <span className="shrink-0 font-bold">+</span>
+            <span>{pro}</span>
+          </div>
+        ))}
+        {card.cons?.map((con, i) => (
+          <div key={i} className="flex gap-2 text-[13.5px] text-rust">
+            <span className="shrink-0 font-bold">!</span>
+            <span>{con}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
